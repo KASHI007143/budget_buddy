@@ -1,0 +1,89 @@
+# db.py
+import sqlite3
+from datetime import datetime
+
+DB_NAME = "budgetbuddy.db"
+
+def get_connection():
+    conn = sqlite3.connect(DB_NAME)
+    conn.row_factory = sqlite3.Row  # access columns by name
+    return conn
+
+def create_table():
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS expenses (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                date TEXT NOT NULL,
+                category TEXT NOT NULL,
+                amount REAL NOT NULL,
+                notes TEXT
+            )
+        """)
+        conn.commit()
+
+# ---- Validation helpers ----
+def validate_date(date_str):
+    """Accepts 'YYYY-MM-DD'. Raises ValueError if invalid."""
+    try:
+        # will raise ValueError if format wrong
+        datetime.strptime(date_str, "%Y-%m-%d")
+        return date_str
+    except Exception:
+        raise ValueError("Date must be in YYYY-MM-DD format")
+
+def validate_amount(amount):
+    try:
+        val = float(amount)
+        return val
+    except Exception:
+        raise ValueError("Amount must be a number")
+
+# ---- CRUD operations ----
+def add_expense(date, category, amount, notes=""):
+    date = validate_date(date)
+    amount = validate_amount(amount)
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            "INSERT INTO expenses (date, category, amount, notes) VALUES (?, ?, ?, ?)",
+            (date, category.strip(), amount, notes.strip())
+        )
+        conn.commit()
+        return cursor.lastrowid
+
+def get_all_expenses():
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM expenses ORDER BY date DESC, id DESC")
+        rows = cursor.fetchall()
+        return [dict(row) for row in rows]
+
+def get_expense_by_id(expense_id):
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM expenses WHERE id = ?", (expense_id,))
+        row = cursor.fetchone()
+        return dict(row) if row else None
+
+def update_expense(expense_id, date, category, amount, notes=""):
+    if not get_expense_by_id(expense_id):
+        return False
+    date = validate_date(date)
+    amount = validate_amount(amount)
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            "UPDATE expenses SET date=?, category=?, amount=?, notes=? WHERE id=?",
+            (date, category.strip(), amount, notes.strip(), expense_id)
+        )
+        conn.commit()
+        return cursor.rowcount > 0
+
+def delete_expense(expense_id):
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM expenses WHERE id=?", (expense_id,))
+        conn.commit()
+        return cursor.rowcount > 0

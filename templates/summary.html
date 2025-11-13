@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Budget Summary{% endblock %}
+{% block content %}
+<div class="container mt-5">
+    <h1 class="text-center text-primary">Budget Summary</h1>
+    <div class="row">
+        <div class="col-md-6">
+            <h3>Total Expenses: ${{ "%.2f"|format(total) }}</h3>
+        </div>
+    </div>
+    <h3>Expenses by Category</h3>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Category</th>
+                <th>Total Amount</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for cat, amt in categories.items() %}
+            <tr>
+                <td>{{ cat }}</td>
+                <td>${{ "%.2f"|format(amt) }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <a href="/" class="btn btn-primary">Back to Expenses</a>
+</div>
+{% endblock %}
