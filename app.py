@@ -1,0 +1,93 @@
+1# app.py
+from db import create_table, add_expense, get_all_expenses, get_expense_by_id, update_expense, delete_expense
+from datetime import date
+
+def input_date(prompt="Enter date (YYYY-MM-DD) [default today]: "):
+    s = input(prompt).strip()
+    return s if s else date.today().isoformat()
+
+def input_amount(prompt="Enter amount: "):
+    return input(prompt).strip()
+
+def show_menu():
+    print("\n=== BudgetBuddy ===")
+    print("1. Add expense")
+    print("2. View all expenses")
+    print("3. Update expense")
+    print("4. Delete expense")
+    print("0. Exit")
+
+def print_expenses(rows):
+    if not rows:
+        print("No expenses found.")
+        return
+    print(f"{'ID':<4} {'Date':<12} {'Category':<15} {'Amount':<10} Notes")
+    print("-"*60)
+    for r in rows:
+        print(f"{r['id']:<4} {r['date']:<12} {r['category']:<15} {r['amount']:<10} {r['notes']}")
+
+def main():
+    create_table()
+    while True:
+        show_menu()
+        choice = input("Choose an option: ").strip()
+        if choice == "1":
+            d = input_date()
+            cat = input("Enter category: ").strip()
+            amt = input_amount()
+            notes = input("Notes (optional): ")
+            try:
+                new_id = add_expense(d, cat, amt, notes)
+                print(f"✅ Expense added with id {new_id}")
+            except Exception as e:
+                print("Error:", e)
+
+        elif choice == "2":
+            rows = get_all_expenses()
+            print_expenses(rows)
+
+        elif choice == "3":
+            try:
+                eid = int(input("Enter ID of expense to update: ").strip())
+            except:
+                print("Invalid ID")
+                continue
+            existing = get_expense_by_id(eid)
+            if not existing:
+                print("Expense not found.")
+                continue
+            print("Leave field blank to keep current value.")
+            new_date = input(f"Date [{existing['date']}]: ").strip() or existing['date']
+            new_cat = input(f"Category [{existing['category']}]: ").strip() or existing['category']
+            new_amt = input(f"Amount [{existing['amount']}]: ").strip() or str(existing['amount'])
+            new_notes = input(f"Notes [{existing['notes']}]: ").strip() or existing['notes']
+            try:
+                ok = update_expense(eid, new_date, new_cat, new_amt, new_notes)
+                if ok:
+                    print("✅ Expense updated.")
+                else:
+                    print("Update failed.")
+            except Exception as e:
+                print("Error:", e)
+
+        elif choice == "4":
+            try:
+                eid = int(input("Enter ID of expense to delete: ").strip())
+            except:
+                print("Invalid ID")
+                continue
+            confirm = input("Type 'yes' to confirm delete: ").strip().lower()
+            if confirm == "yes":
+                ok = delete_expense(eid)
+                print("Deleted." if ok else "Expense not found.")
+            else:
+                print("Delete cancelled.")
+
+        elif choice == "0":
+            print("Bye 👋")
+            break
+        else:
+            print("Invalid option.")
+
+if __name__ == "__main__":
+    main()

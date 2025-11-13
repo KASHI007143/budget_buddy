@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Expenses by Category{% endblock %}
+{% block content %}
+<div class="container mt-5">
+    <h1>Expenses by Category</h1>
+    <form method="POST" class="mb-4">
+        <div class="mb-3">
+            <label for="category" class="form-label">Category</label>
+            <input type="text" id="category" name="category" class="form-control" value="{{ selected_category or '' }}" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Filter</button>
+    </form>
+    {# Display expenses table if any expenses exist #}
+    {% if expenses %}
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Category</th>
+                <th>Amount</th>
+                <th>Notes</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for expense in expenses %}
+            <tr>
+                <td>{{ expense.date }}</td>
+                <td>{{ expense.category }}</td>
+                <td>${{ "%.2f"|format(expense.amount) }}</td>
+                <td>{{ expense.notes }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {# Show message if no expenses found for the selected category #}
+    {% elif selected_category %}
+    <p>No expenses found for category "{{ selected_category }}".</p>
+    {% endif %}
+</div>
+{% endblock %}
