@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Expenses by Date Range{% endblock %}
+{% block content %}
+<div class="container mt-5">
+    <h1>Expenses by Date Range</h1>
+    <form method="POST" class="mb-4">
+        <div class="row">
+            <div class="col-md-4">
+                <label for="start_date" class="form-label">Start Date</label>
+                <input type="date" id="start_date" name="start_date" class="form-control" value="{{ start_date or '' }}" required>
+            </div>
+            <div class="col-md-4">
+                <label for="end_date" class="form-label">End Date</label>
+                <input type="date" id="end_date" name="end_date" class="form-control" value="{{ end_date or '' }}" required>
+            </div>
+        </div>
+        {# Display error message if any #}
+        {% if error %}
+        <div class="alert alert-danger mt-3">{{ error }}</div>
+        {% endif %}
+        <button type="submit" class="btn btn-primary mt-3">Filter</button>
+    </form>
+    {# Display expenses table if any expenses exist #}
+    {% if expenses %}
+    <table class="table table-striped mt-4">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Category</th>
+                <th>Amount</th>
+                <th>Notes</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for expense in expenses %}
+            <tr>
+                <td>{{ expense.date }}</td>
+                <td>{{ expense.category }}</td>
+                <td>${{ "%.2f"|format(expense.amount) }}</td>
+                <td>{{ expense.notes }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {# Show message if no expenses found in the date range #}
+    {% elif start_date and end_date %}
+    <p>No expenses found between {{ start_date }} and {{ end_date }}.</p>
+    {% endif %}
+</div>
+{% endblock %}

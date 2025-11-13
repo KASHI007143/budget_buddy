@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Monthly Summary{% endblock %}
+{% block content %}
+<div class="container mt-5">
+    <h1>Monthly Summary</h1>
+    {# Display monthly summary table if data exists #}
+    {% if summary %}
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Month</th>
+                <th>Total Expenses</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in summary %}
+            <tr>
+                <td>{{ item.month }}</td>
+                <td>${{ "%.2f"|format(item.total) }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {# Show message if no expense data available #}
+    {% else %}
+    <p>No expense data available.</p>
+    {% endif %}
+</div>
+{% endblock %}

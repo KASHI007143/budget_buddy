@@ -1,0 +1,18 @@
+body {
+    background-color: #121212;
+    color: #f0f0f0;
+    transition: background-color 1.5s ease, color 1.5s ease;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    transition: color 1.5s ease;
+}
+
+.container {
+    animation: fadeIn 2s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
