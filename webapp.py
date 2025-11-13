@@ -1,3 +1,4 @@
+import os
 from flask import Flask, render_template, request, redirect, url_for
 from datetime import date
 import csv
@@ -14,8 +15,16 @@ def create_app():
     Create and configure the Flask application with routes for managing expenses.
     """
     app = Flask(__name__)
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///budgetbuddy.db'
-    app.config['SECRET_KEY'] = 'your_secret_key'  # Change this to a random secret key
+    app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'your_secret_key')  # Use env var for production
+    database_uri = 'sqlite:///budgetbuddy.db'
+    db_url = os.environ.get('DATABASE_URL')
+    if db_url:
+        # Convert postgres:// to postgresql:// for SQLAlchemy
+        if db_url.startswith("postgres://"):
+            db_url = db_url.replace("postgres://", "postgresql://", 1)
+        database_uri = db_url
+    app.config['SQLALCHEMY_DATABASE_URI'] = database_uri
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     db.init_app(app)
     with app.app_context():
         db.create_all()
